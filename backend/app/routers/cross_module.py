@@ -67,6 +67,13 @@ def execute_query(template_id: int, operator: str = "系统"):
     return svc.execute_query(template_id, operator=operator)
 
 
+@router.get("/query/{template_id}/runs")
+def query_execution_runs(template_id: int):
+    """查询模板实际执行留痕：样本、口径版本与取数三态"""
+    svc = QueryBuilderService()
+    return {"template_id": template_id, "runs": svc.get_execution_runs(template_id)}
+
+
 @router.post("/data-service/{api_id}/call")
 def call_data_service(api_id: int, operator: str = "客户端"):
     """调用数据服务API"""
@@ -175,10 +182,38 @@ def share_pivot_to_report(config_id: int, report_template_id: int):
 
 
 @router.get("/report-template/{template_id}/generate")
-def generate_report(template_id: int):
-    """生成报告"""
+def generate_report(template_id: int, operator: str = "编制人"):
+    """生成报告（章节级容错，返回含取数覆盖视图的持久化稿件）"""
     svc = ReportTemplateService()
-    return svc.generate_report(template_id)
+    return svc.generate_report(template_id, operator=operator)
+
+
+@router.get("/report-template/{template_id}/coverage")
+def report_coverage_view(template_id: int, operator: str = "编制人"):
+    """报告取数覆盖视图：按指标集聚合章节样本、口径与取数缺项"""
+    svc = ReportTemplateService()
+    return svc.build_coverage_view(template_id, operator=operator, execute=False)
+
+
+@router.post("/report-template/{template_id}/refetch")
+def report_refetch(template_id: int, operator: str = "编制人", draft_id: int | None = None):
+    """补取失败/缺项章节的查询模板，并可刷新同一稿件"""
+    svc = ReportTemplateService()
+    return svc.refetch_missing(template_id, operator=operator, draft_id=draft_id)
+
+
+@router.get("/report-template/drafts/{draft_id}")
+def open_report_draft(draft_id: int):
+    """重新打开同一份报告稿件，查看各章节最新可引用情况"""
+    svc = ReportTemplateService()
+    return svc.open_draft(draft_id)
+
+
+@router.get("/report-template/{template_id}/drafts")
+def list_report_drafts(template_id: int):
+    """列出某报告模板下已生成的稿件"""
+    svc = ReportTemplateService()
+    return {"template_id": template_id, "drafts": svc.list_drafts(template_id)}
 
 
 # ── 链3: 分群对比异常链 ──

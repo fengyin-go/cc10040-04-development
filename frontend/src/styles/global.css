@@ -70,3 +70,37 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .analysis-chart { display: flex; align-items: flex-end; gap: 8px; height: 160px; padding: 12px 0; }
 .analysis-bar { flex: 1; border-radius: 4px 4px 0 0; background: var(--brand); min-width: 24px; position: relative; transition: height 0.4s; }
 .analysis-bar span { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--muted); white-space: nowrap; }
+/* 报告取数覆盖视图 */
+.coverage-modal { width: min(960px, 96vw); }
+.coverage-modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.coverage-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.coverage-head h3 { margin: 0 0 4px; }
+.coverage-message { padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+.coverage-message.ok { background: #ecfdf3; color: #027a48; border: 1px solid #abefc6; }
+.coverage-message.error { background: #fef3f2; color: #b42318; border: 1px solid #fda29b; }
+.draft-banner { padding: 8px 12px; background: #eff8ff; border: 1px solid #b2ddff; border-radius: 6px; font-size: 13px; color: #175cd3; }
+.coverage-section { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; overflow: hidden; background: #fff; }
+.coverage-section[data-coverage='齐备'] { border-left: 4px solid #12b76a; }
+.coverage-section[data-coverage='无记录'] { border-left: 4px solid #f79009; }
+.coverage-section[data-coverage='无法执行'] { border-left: 4px solid #f04438; }
+.section-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; flex-wrap: wrap; }
+.section-metric { font-size: 14px; }
+.section-meta { color: var(--muted); font-size: 12px; flex: 1; }
+.section-toggle { color: var(--brand); font-size: 12px; white-space: nowrap; }
+.section-body { padding: 0 12px 12px; border-top: 1px solid #f0f2f5; }
+.coverage-badge, .outcome-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; white-space: nowrap; }
+.badge-ready, .outcome-ready { background: #ecfdf3; color: #027a48; border: 1px solid #abefc6; }
+.badge-empty, .outcome-empty { background: #fffaeb; color: #b54708; border: 1px solid #fedf89; }
+.badge-blocked, .outcome-failed { background: #fef3f2; color: #b42318; border: 1px solid #fda29b; }
+.badge-retriable { background: #eff8ff; color: #175cd3; border: 1px solid #b2ddff; }
+.missing-list { font-size: 12px; margin: 10px 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.missing-list.ok { color: #027a48; }
+.missing-title { color: var(--muted); }
+.missing-item { background: #fffaeb; border: 1px solid #fedf89; color: #b54708; border-radius: 4px; padding: 2px 8px; }
+.template-table th, .template-table td { font-size: 12px; }
+.dim-text { color: var(--muted); font-size: 12px; }
+.sample-block { margin-top: 10px; }
+.sample-block h4 { margin: 8px 0; font-size: 13px; }
+.stat-card.coverage-ready { border-top: 3px solid #12b76a; }
+.stat-card.coverage-empty { border-top: 3px solid #f79009; }
+.stat-card.coverage-blocked { border-top: 3px solid #f04438; }

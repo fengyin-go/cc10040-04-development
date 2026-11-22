@@ -60,6 +60,15 @@
             >
               {{ action }}
             </button>
+            <button
+              v-if="meta.key === 'report_template'"
+              class="link"
+              type="button"
+              :data-testid="`coverage-${row.id}`"
+              @click="openCoverage(row)"
+            >
+              章节详情/报告取数视图
+            </button>
           </td>
         </tr>
         <tr v-if="!rows.length">
@@ -86,6 +95,24 @@
       </form>
     </div>
 
+    <div v-if="coverageEntry" class="modal-backdrop coverage-backdrop" data-testid="coverage-modal">
+      <div class="modal coverage-modal">
+        <div class="coverage-modal-head">
+          <div>
+            <h3>{{ coverageEntry['模板名称'] }} · 章节详情</h3>
+            <p class="page-desc">
+              指标集：{{ coverageEntry['包含指标集'] }} ｜ 周期：{{ coverageEntry['报告周期'] }} ｜
+              当前状态：{{ coverageEntry.status }}
+            </p>
+          </div>
+          <button class="btn" type="button" data-testid="coverage-close" @click="coverageEntry = null">
+            关闭
+          </button>
+        </div>
+        <ReportCoveragePanel :template-id="Number(coverageEntry.id)" />
+      </div>
+    </div>
+
     <footer class="page-foot">
       <span>共 {{ total }} 条{{ meta.name }}记录</span>
       <span v-if="errorMessage" class="error-text">{{ errorMessage }}</span>
@@ -103,6 +130,7 @@ import {
   moduleMeta,
   runAction as applyAction,
 } from '@/api/backend-service'
+import ReportCoveragePanel from '@/components/ReportCoveragePanel.vue'
 import type { EntryRow } from '@/data/types'
 
 const props = defineProps<{ moduleKey: string }>()
@@ -115,6 +143,8 @@ const filterFields = meta.fields.slice(0, 3)
 const showCreate = ref(false)
 const creating = ref(false)
 const createValues = ref<Record<string, string>>({})
+// 报告模板章节详情：打开后在弹窗内展示报告取数视图
+const coverageEntry = ref<EntryRow | null>(null)
 const stats = computed(() => [
   { label: meta.metrics[0], value: total.value },
   { label: meta.metrics[1], value: rows.value.filter((row) => row.status === meta.statuses[1]).length },
@@ -148,6 +178,11 @@ function openCreate() {
   createValues.value = Object.fromEntries(meta.fields.map((field) => [field, '']))
   errorMessage.value = ''
   showCreate.value = true
+}
+
+function openCoverage(row: EntryRow) {
+  errorMessage.value = ''
+  coverageEntry.value = row
 }
 
 async function submitCreate() {

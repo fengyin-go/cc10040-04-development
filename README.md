@@ -79,5 +79,23 @@ npm run dev
 - 列表接口统一返回 `{ items, total, page, size }`，动作接口统一返回 `{ ok, message }`。
 - 状态流转只允许在 `app/services` 里改，路由层不做业务判断。
 
+## 报告取数视图
+
+报告模板的「章节详情/报告取数视图」面向编制人员，按指标集逐章聚合取数情况，
+核对后再出具分析报告：
+
+- 章节覆盖三态互斥：`齐备`（有真实样本可引用图表）、`无记录`（查询成功但结果为空，
+  属取数缺项，汇总不得补零）、`无法执行`（模板未发布或无生效口径等）。
+- 查询构建器每次执行（含缓存命中、空结果、失败）都在内存仓库留下运行记录，
+  保存实际样本、口径版本、取数来源和操作人；空结果与执行失败严格区分。
+- 多指标报告逐章独立取数，单章模板失败不影响其他章节；生成结果持久化为稿件，
+  可反复打开核对。补取接口只重跑具备生效口径的已发布模板，并刷新同一稿件。
+- 相关接口（见 `app/routers/cross_module.py`）：
+  - `GET /api/cross/report-template/{id}/coverage` 取数覆盖视图
+  - `GET /api/cross/report-template/{id}/generate` 生成报告稿件
+  - `POST /api/cross/report-template/{id}/refetch?draft_id=` 补取并刷新稿件
+  - `GET /api/cross/report-template/drafts/{draft_id}` 重新打开同一稿件
+  - `GET /api/cross/query/{id}/runs` 查询模板实际执行留痕
+
 领域：数据工程
 子方向：数据分析与数据应用

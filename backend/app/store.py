@@ -22,6 +22,10 @@ class Store:
         self._cache: dict[str, tuple[float, Any]] = {}
         # Cross-module journal
         self._query_log: list[dict[str, Any]] = []
+        # 查询构建器实际执行留痕：每次执行（含缓存命中、空结果、失败）都记录样本与口径
+        self._query_runs: dict[int, list[dict[str, Any]]] = {}
+        # 报告稿件：一次报告生成对应一份可反复打开核对的取数快照
+        self._report_drafts: dict[int, dict[str, Any]] = {}
         # Cohort snapshots
         self._cohort_snapshots: dict[str, list[dict[str, Any]]] = {}
         # Anomaly records
@@ -101,6 +105,46 @@ class Store:
 
     def query_logs(self) -> list[dict[str, Any]]:
         return self._query_log
+
+    # ── 查询执行留痕（实际执行的样本与口径） ──
+
+    def record_query_run(self, template_id: int, run: dict[str, Any]) -> dict[str, Any]:
+        """登记一次查询执行结果。
+
+        out_come 取值：
+          - 成功有数据：查询成功且返回样本行
+          - 成功无记录：查询成功执行但结果为空（缺项，不能按 0 汇总）
+          - 执行失败：模板无法执行（未发布、无生效口径等），没有任何样本
+        """
+        run = dict(run)
+        run.setdefault("id", len(self._query_runs.get(template_id, [])) + 1)
+        run.setdefault("executed_at", time.strftime("%Y-%m-%d %H:%M:%S"))
+        self._query_runs.setdefault(template_id, []).append(run)
+        return run
+
+    def latest_query_run(self, template_id: int) -> dict[str, Any] | None:
+        runs = self._query_runs.get(template_id)
+        return runs[-1] if runs else None
+
+    def query_runs(self, template_id: int) -> list[dict[str, Any]]:
+        return list(self._query_runs.get(template_id, []))
+
+    # ── 报告稿件（一次生成一份，可反复打开核对） ──
+
+    def save_report_draft(self, draft: dict[str, Any]) -> dict[str, Any]:
+        draft_id = int(draft.get("id") or (max(self._report_drafts, default=0) + 1))
+        draft["id"] = draft_id
+        self._report_drafts[draft_id] = draft
+        return draft
+
+    def get_report_draft(self, draft_id: int) -> dict[str, Any] | None:
+        return self._report_drafts.get(draft_id)
+
+    def report_drafts(self, template_id: int | None = None) -> list[dict[str, Any]]:
+        drafts = list(self._report_drafts.values())
+        if template_id is not None:
+            drafts = [d for d in drafts if d.get("template_id") == template_id]
+        return sorted(drafts, key=lambda d: int(d.get("id", 0)))
 
     # ── Cache operations ──
 
